@@ -1,12 +1,15 @@
 import logging
 import traceback
+import uuid
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
 from django.utils.timezone import now
 from rest_framework import response, viewsets
 from rest_framework.authentication import BaseAuthentication
 
-from api.methods import clean_sensitive_data, get_user_by_token
+from api.methods import clean_sensitive_data, get_token_key, get_user_by_token
 from api.models import TokenKey
 from core.exceptions import (
     APIAccessDenied,
@@ -132,3 +135,110 @@ class BaseAPI(viewsets.GenericViewSet):
             return model.objects.get(uid=pk, **query)
         except model.DoesNotExist:
             raise APINotFound()
+
+
+class BaseTest(TestCase):
+    DEFAULT_USERNAME = "foo@bar.com"
+    DEFAULT_PASSWORD = "password"
+
+    @classmethod
+    def tearDownClass(cls):
+        super(BaseTest, cls).tearDownClass()
+
+    def setUp(self):
+        pass
+
+    def _create_fake_email(self):
+        return f"{uuid.uuid4()}@gmail.com"
+
+    def _create_account(self, username=DEFAULT_USERNAME, role=None) -> User:
+        user = User.objects.create_user(email=username, username=username)
+
+        get_token_key(user=user)
+
+        return user
+
+    def _get_api_token(self, user):
+        return TokenKey.objects.filter(user=user).first().key
+
+    """
+    HTTP Helpers
+    """
+
+    def _delete(self, path, headers=None, token=None):
+        if not headers:
+            headers = {}
+
+        if token:
+            headers["HTTP_AUTHORIZATION"] = f"bearer {token}"
+
+        client = Client()
+        return client.delete(path, content_type="application/json", **headers)
+
+    def _post(
+        self, path, data=None, headers=None, content_type="application/json", token=None
+    ):
+        kwargs = {}
+
+        if headers:
+            kwargs = headers
+
+        kwargs["data"] = data
+
+        if token:
+            kwargs["HTTP_AUTHORIZATION"] = f"bearer {token}"
+
+        client = Client()
+
+        if content_type:
+            return client.post(path, content_type=content_type, **kwargs)
+        else:
+            return client.post(path, **kwargs)
+
+    def _post_form(self, path, data, headers=None, token=None):
+        if not headers:
+            headers = {}
+        if token:
+            headers["HTTP_AUTHORIZATION"] = f"bearer {token}"
+        client = Client()
+        return client.post(path, data, **headers)
+
+    def _put(self, path, data=None, headers=None, token=None):
+        kwargs = {}
+
+        if headers:
+            kwargs = headers
+
+        if data:
+            kwargs["data"] = data
+
+        if token:
+            kwargs["HTTP_AUTHORIZATION"] = f"bearer {token}"
+
+        client = Client()
+        return client.put(path, content_type="application/json", **kwargs)
+
+    def _patch(self, path, data=None, headers=None, token=None):
+        kwargs = {}
+
+        if headers:
+            kwargs = headers
+
+        if data:
+            kwargs["data"] = data
+
+        if token:
+            kwargs["HTTP_AUTHORIZATION"] = f"bearer {token}"
+
+        client = Client()
+        return client.patch(path, content_type="application/json", **kwargs)
+
+    def _get(self, path, data=None, headers=None, token=None):
+        if not headers:
+            headers = {}
+
+        if token:
+            headers["HTTP_AUTHORIZATION"] = f"bearer {token}"
+
+        client = Client()
+        return client.get(path, data, content_type="application/json", **headers)
