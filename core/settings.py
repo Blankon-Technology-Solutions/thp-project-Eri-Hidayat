@@ -25,6 +25,7 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.linkedin_oauth2",
+    "channels",
     # Apps
     "api",
     "todos",
@@ -73,6 +75,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.asgi.application"
 
 
 # Database
@@ -137,3 +140,4 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 from core.extended_settings.allauth import *
+from core.extended_settings.channels import *

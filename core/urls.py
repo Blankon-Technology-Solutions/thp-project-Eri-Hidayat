@@ -18,8 +18,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from todos.consumers import TodoConsumer
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("", include("api.urls"), name="api"),
+]
+
+websocket_urlpatterns = [
+    path("ws/todos/", TodoConsumer.as_asgi()),
 ]
