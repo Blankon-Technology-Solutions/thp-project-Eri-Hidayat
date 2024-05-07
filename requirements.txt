@@ -1,5 +1,6 @@
 black
 bson
+channels
 coverage
 daphne
 django
