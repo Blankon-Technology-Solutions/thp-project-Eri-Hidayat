@@ -1,7 +1,9 @@
 black
 bson
+coverage
 django
 django-allauth[socialaccount]
+djangorestframework
 flake8
 isort
 python-dotenv
