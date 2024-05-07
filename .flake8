@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 88
+max-complexity = 100
+filename = *.py
+ignore = E302,W503,E203
+exclude =
+  **/migrations
+  .env
+  .venv
+  env
+  venv
+  ENV
+  env.bak
+  venv.bak
+  **/static_src
+  core/asgi.py
+  settings.py
