@@ -1,6 +1,7 @@
 black
 bson
 coverage
+daphne
 django
 django-allauth[socialaccount]
 djangorestframework
